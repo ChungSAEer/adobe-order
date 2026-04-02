@@ -3,22 +3,22 @@
 import { useState } from 'react';
 
 const PLAN_OPTIONS = [
-  { value: '1m', label: '1 Tháng', sub: 'Adobe Team' },
-  { value: '3m', label: '3 Tháng', sub: 'Adobe Team' },
+  { value: '1m', label: '1 Month', sub: 'Adobe Team' },
+  { value: '3m', label: '3 Months', sub: 'Adobe Team' },
 ];
 
 export default function OrderForm({ uid, defaultDuration }) {
   const [email, setEmail]       = useState('');
-  const [plan]                  = useState(defaultDuration || '1m'); // locked
+  const [plan]                  = useState(defaultDuration || '1m');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
   const [emailErr, setEmailErr] = useState('');
   const [result, setResult]     = useState(null);
 
   const validate = () => {
-    if (!email) { setEmailErr('Vui lòng nhập email'); return false; }
+    if (!email) { setEmailErr('Please enter your email'); return false; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailErr('Email không hợp lệ'); return false;
+      setEmailErr('Invalid email address'); return false;
     }
     setEmailErr('');
     return true;
@@ -36,7 +36,7 @@ export default function OrderForm({ uid, defaultDuration }) {
         body: JSON.stringify({ uid, email: email.trim().toLowerCase(), plan }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra');
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
       setResult(data);
     } catch (err) {
       setError(err.message);
@@ -48,7 +48,7 @@ export default function OrderForm({ uid, defaultDuration }) {
   /* ── Success ── */
   if (result) {
     const expiresDate = result.expiresAt
-      ? new Date(result.expiresAt).toLocaleDateString('vi-VN', {
+      ? new Date(result.expiresAt).toLocaleDateString('en-GB', {
           day: '2-digit', month: '2-digit', year: 'numeric',
         })
       : null;
@@ -60,12 +60,12 @@ export default function OrderForm({ uid, defaultDuration }) {
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <p className="success-title">Kích hoạt thành công! 🎉</p>
-        <p className="success-sub">Tài khoản Adobe của bạn đã được kích hoạt.</p>
+        <p className="success-title">Activation Successful! 🎉</p>
+        <p className="success-sub">Your Adobe account has been activated.</p>
 
         <div className="order-box" style={{ textAlign: 'left' }}>
           <div className="order-row">
-            <span className="ok">Mã đơn hàng</span>
+            <span className="ok">Order #</span>
             <span className="ov">#{result.orderNumber}</span>
           </div>
           <div className="order-row">
@@ -73,18 +73,26 @@ export default function OrderForm({ uid, defaultDuration }) {
             <span className="ov" style={{ fontSize: 13, wordBreak: 'break-all' }}>{result.email}</span>
           </div>
           <div className="order-row">
-            <span className="ok">Gói</span>
-            <span className="ov">Adobe Team – {result.duration === '1m' ? '1 Tháng' : '3 Tháng'}</span>
+            <span className="ok">Plan</span>
+            <span className="ov">Adobe Team – {result.duration === '1m' ? '1 Month' : '3 Months'}</span>
           </div>
           {expiresDate && (
             <div className="order-row">
-              <span className="ok">Hết hạn</span>
+              <span className="ok">Expires</span>
               <span className="ov" style={{ color: 'var(--success)' }}>{expiresDate}</span>
             </div>
           )}
         </div>
 
-        <p className="footer-note">Kiểm tra email để xác nhận kích hoạt ✉️</p>
+        {/* Instruction */}
+        <div className="alert alert-success" style={{ marginTop: 16, textAlign: 'left' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Your account has been successfully activated. Please log out and log back into Adobe to complete the process.
+        </div>
+
+        <p className="footer-note">Check your inbox for activation confirmation ✉️</p>
       </div>
     );
   }
@@ -94,7 +102,7 @@ export default function OrderForm({ uid, defaultDuration }) {
     <form className="form" onSubmit={handleSubmit} noValidate>
       {/* Email */}
       <div className="field">
-        <label className="label" htmlFor="adobe-email">Adobe Email (để kích hoạt)</label>
+        <label className="label" htmlFor="adobe-email">Adobe Email (to activate)</label>
         <input
           id="adobe-email"
           type="email"
@@ -108,9 +116,9 @@ export default function OrderForm({ uid, defaultDuration }) {
         {emailErr && <span className="error-msg">{emailErr}</span>}
       </div>
 
-      {/* Plan – locked to link duration */}
+      {/* Plan – locked */}
       <div className="field">
-        <label className="label">Gói đã chọn</label>
+        <label className="label">Selected Plan</label>
         <div className="plan-grid">
           {PLAN_OPTIONS.map((opt) => {
             const isLocked = opt.value !== defaultDuration;
@@ -156,10 +164,10 @@ export default function OrderForm({ uid, defaultDuration }) {
 
       <button type="submit" className="btn btn-primary" disabled={loading}>
         {loading && <span className="spinner" />}
-        {loading ? 'Đang kích hoạt...' : 'Kích hoạt ngay'}
+        {loading ? 'Activating...' : 'Activate Now'}
       </button>
 
-      <p className="footer-note">🔒 Thông tin của bạn được bảo mật tuyệt đối</p>
+      <p className="footer-note">🔒 Your information is kept strictly confidential</p>
     </form>
   );
 }

@@ -2,7 +2,7 @@ const LOGO_URL =
   'https://production-gameflipusercontent.fingershock.com/us-east-1:41dea0ad-0ae0-4f09-bd7f-0f9151bf5ae3/avatar/be27339f-60f3-41f2-b012-aa359da9a320/320x320.webp';
 
 export const metadata = {
-  title: 'Link không hợp lệ | Voucher Kingdom',
+  title: 'Invalid Link | Voucher Kingdom',
 };
 
 export default function ExpiredPage() {
