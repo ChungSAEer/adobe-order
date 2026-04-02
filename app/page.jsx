@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Trang chủ | Adobe Order',
+  title: 'Home | Voucher Kingdom',
 };
 
 export default function HomePage() {
@@ -19,12 +19,12 @@ export default function HomePage() {
           </div>
           <h1 className="card-title">Adobe Order</h1>
           <p className="card-subtitle">
-            Hệ thống đặt hàng Adobe nhanh chóng &amp; an toàn.<br/>
-            Vui lòng sử dụng đường link được cấp từ admin.
+            Fast &amp; secure Adobe activation system.<br/>
+            Please use the link provided by your admin.
           </p>
         </div>
         <p className="footer-note" style={{ marginTop: 0 }}>
-          Nếu bạn chưa có link, hãy liên hệ admin Telegram để được hỗ trợ.
+          Don&apos;t have a link? Contact your Telegram admin for assistance.
         </p>
       </div>
     </main>

@@ -25,12 +25,12 @@ export default function ExpiredPage() {
             <line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
         </div>
-        <p className="status-title" style={{ color: '#ef4444' }}>Link không hợp lệ</p>
+        <p className="status-title" style={{ color: '#ef4444' }}>Invalid Link</p>
         <p className="status-sub">
-          Link này đã được sử dụng hoặc không còn tồn tại.<br />
-          Vui lòng liên hệ admin để nhận link mới.
+          This link has already been used or does not exist.<br />
+          Please contact the admin to receive a new link.
         </p>
-        <p className="footer-note">Mỗi link chỉ sử dụng được một lần duy nhất.</p>
+        <p className="footer-note">Each link can only be used once.</p>
       </div>
     </main>
   );
