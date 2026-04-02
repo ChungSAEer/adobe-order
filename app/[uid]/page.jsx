@@ -2,12 +2,15 @@ import { redirect } from 'next/navigation';
 import { getLink } from '@/lib/googleSheets';
 import OrderForm from './OrderForm';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata() {
   return {
-    title: 'Đặt hàng Adobe | Adobe Order',
-    description: 'Điền thông tin để hoàn tất đặt hàng Adobe Creative Cloud.',
+    title: 'Kích hoạt Adobe | Voucher Kingdom',
+    description: 'Kích hoạt Adobe Creative Cloud nhanh chóng và bảo mật.',
   };
 }
+
+const LOGO_URL =
+  'https://production-gameflipusercontent.fingershock.com/us-east-1:41dea0ad-0ae0-4f09-bd7f-0f9151bf5ae3/avatar/be27339f-60f3-41f2-b012-aa359da9a320/320x320.webp';
 
 export default async function OrderPage({ params }) {
   const { uid } = await params;
@@ -19,28 +22,21 @@ export default async function OrderPage({ params }) {
     redirect('/expired');
   }
 
-  if (!link || link.used) {
-    redirect('/expired');
-  }
+  if (!link || link.used) redirect('/expired');
 
   return (
     <main className="page">
       <div className="card">
-        {/* Header */}
-        <div className="logo-area">
-          <div className="logo-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-            <span>Adobe Team</span>
+        {/* Brand */}
+        <div className="brand">
+          <img className="brand-logo" src={LOGO_URL} alt="Voucher Kingdom" />
+          <div className="brand-text">
+            <h1>Voucher Kingdom</h1>
+            <p>Elegant, secure Adobe activation.</p>
           </div>
-          <h1 className="card-title">Đặt hàng nhanh</h1>
-          <p className="card-subtitle">
-            Gói <strong>{link.duration === '1m' ? '1 Tháng' : '3 Tháng'}</strong> · Điền email để hoàn tất
-          </p>
         </div>
+
+        <div className="divider" />
 
         {/* Form */}
         <OrderForm uid={uid} defaultDuration={link.duration} />
