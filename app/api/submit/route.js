@@ -59,13 +59,17 @@ export async function POST(request) {
   try {
     const notifyChatId = process.env.TELEGRAM_NOTIFY_CHAT_ID;
     const orderCmd = buildOrderCommand(link.duration, email);
+
+    // Message 1: order summary
     const msg =
       `🛒 <b>Đơn hàng mới #${orderNumber}</b>\n\n` +
       `📧 Email: <code>${email}</code>\n` +
       `📦 Gói: <b>${link.duration === '1m' ? '1 Tháng' : '3 Tháng'}</b>\n` +
-      `🔗 UID link: <code>${uid}</code>\n\n` +
-      `<b>Lệnh xử lý:</b>\n<code>${orderCmd}</code>`;
+      `🔗 UID link: <code>${uid}</code>`;
     await sendTelegramMessage(notifyChatId, msg);
+
+    // Message 2: lệnh xử lý (gửi riêng để dễ copy/forward)
+    await sendTelegramMessage(notifyChatId, orderCmd);
   } catch (err) {
     console.error('sendTelegramMessage error:', err);
     // Non-critical – don't fail the request
