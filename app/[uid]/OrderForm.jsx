@@ -50,6 +50,10 @@ export default function OrderForm({ uid, defaultDuration }) {
 
   /* ── Success state ── */
   if (result) {
+    const expiresDate = result.expiresAt
+      ? new Date(result.expiresAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : null;
+
     return (
       <div>
         <div className="success-icon">
@@ -57,8 +61,8 @@ export default function OrderForm({ uid, defaultDuration }) {
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <p className="success-title">Đặt hàng thành công!</p>
-        <p className="success-sub">Đơn hàng của bạn đã được ghi nhận.</p>
+        <p className="success-title">Kích hoạt thành công! 🎉</p>
+        <p className="success-sub">Tài khoản Adobe của bạn đã được kích hoạt.</p>
 
         <div className="order-box">
           <div className="order-row">
@@ -73,10 +77,16 @@ export default function OrderForm({ uid, defaultDuration }) {
             <span className="ok">Gói</span>
             <span className="ov">Adobe Team – {result.duration === '1m' ? '1 Tháng' : '3 Tháng'}</span>
           </div>
+          {expiresDate && (
+            <div className="order-row">
+              <span className="ok">Hết hạn</span>
+              <span className="ov" style={{color:'var(--success)'}}>{expiresDate}</span>
+            </div>
+          )}
         </div>
 
         <p className="footer-note">
-          Chúng tôi sẽ xử lý đơn của bạn trong thời gian sớm nhất 🎉
+          Kiểm tra email để xác nhận kích hoạt ✉️
         </p>
       </div>
     );

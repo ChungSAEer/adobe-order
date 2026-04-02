@@ -1,5 +1,6 @@
 import { getLink, markLinkUsed, appendOrder } from '@/lib/googleSheets';
-import { sendTelegramMessage, buildOrderCommand } from '@/lib/telegram';
+import { sendTelegramMessage } from '@/lib/telegram';
+import { addAdobeUser } from '@/lib/adobeApi';
 
 export async function POST(request) {
   let body;
@@ -21,7 +22,7 @@ export async function POST(request) {
     return Response.json({ error: 'Email không hợp lệ' }, { status: 400 });
   }
 
-  // Check link validity
+  // ── 1. Check link validity ───────────────────────────
   let link;
   try {
     link = await getLink(uid);
@@ -38,41 +39,56 @@ export async function POST(request) {
     return Response.json({ error: 'Link này đã được sử dụng' }, { status: 410 });
   }
 
-  // Append to Google Sheet (Sheet1)
+  const durationMonths = link.duration === '3m' ? 3 : 1;
+
+  // ── 2. Call Adobe API ────────────────────────────────
+  let apiResult;
+  try {
+    apiResult = await addAdobeUser(email, durationMonths);
+  } catch (err) {
+    console.error('Adobe API error:', err);
+    // Return error to user — do NOT close the link
+    return Response.json(
+      { error: `Lỗi kích hoạt Adobe: ${err.message}` },
+      { status: 502 }
+    );
+  }
+
+  // ── 3. Mark link as used ─────────────────────────────
+  try {
+    await markLinkUsed(uid);
+  } catch (err) {
+    console.error('markLinkUsed error:', err);
+    // Non-critical — continue
+  }
+
+  // ── 4. Append to Google Sheet ────────────────────────
   let orderNumber;
   try {
     orderNumber = await appendOrder({ email, duration: link.duration });
   } catch (err) {
     console.error('appendOrder error:', err);
-    return Response.json({ error: 'Lỗi lưu dữ liệu vào Google Sheet' }, { status: 500 });
+    // Non-critical — continue
   }
 
-  // Mark link as used
+  // ── 5. Notify admin (private) ────────────────────────
   try {
-    await markLinkUsed(uid);
+    const adminId = process.env.TELEGRAM_ADMIN_ID;
+    const expiresAt = apiResult.user?.expiresAt
+      ? new Date(apiResult.user.expiresAt).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+      : 'N/A';
+
+    await sendTelegramMessage(
+      adminId,
+      `✅ <b>Đơn hàng #${orderNumber ?? '?'} đã kích hoạt thành công!</b>\n\n` +
+        `📧 Email: <code>${email}</code>\n` +
+        `📦 Gói: <b>${durationMonths} tháng</b>\n` +
+        `📅 Hết hạn: <b>${expiresAt}</b>\n` +
+        `💳 Credits còn lại: <b>${apiResult.creditsRemaining}</b>`
+    );
   } catch (err) {
-    console.error('markLinkUsed error:', err);
-    // Non-critical – continue
-  }
-
-  // Send Telegram notification to group
-  try {
-    const notifyChatId = process.env.TELEGRAM_NOTIFY_CHAT_ID;
-    const orderCmd = buildOrderCommand(link.duration, email);
-
-    // Message 1: order summary
-    const msg =
-      `🛒 <b>Đơn hàng mới #${orderNumber}</b>\n\n` +
-      `📧 Email: <code>${email}</code>\n` +
-      `📦 Gói: <b>${link.duration === '1m' ? '1 Tháng' : '3 Tháng'}</b>\n` +
-      `🔗 UID link: <code>${uid}</code>`;
-    await sendTelegramMessage(notifyChatId, msg);
-
-    // Message 2: lệnh xử lý (gửi riêng để dễ copy/forward)
-    await sendTelegramMessage(notifyChatId, orderCmd);
-  } catch (err) {
-    console.error('sendTelegramMessage error:', err);
-    // Non-critical – don't fail the request
+    console.error('Telegram notify error:', err);
+    // Non-critical
   }
 
   return Response.json({
@@ -80,5 +96,6 @@ export async function POST(request) {
     orderNumber,
     duration: link.duration,
     email,
+    expiresAt: apiResult.user?.expiresAt,
   });
 }
